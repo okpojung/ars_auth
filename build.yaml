@@ -1,0 +1,9 @@
+# build.yaml
+targets:
+  $default:
+    sources:
+      # Only include files in the lib folder
+      - lib/**
+      # Exclude generated files from the build process
+      - "!**/*.g.dart"
+      - "!**/*.freezed.dart"
