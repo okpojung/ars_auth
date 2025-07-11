@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ars_login/ars_login.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -76,6 +78,20 @@ class HomePage extends StatelessWidget {
                 );
               },
               child: const Text('기본 ARS 로그인 (콜백 없음)'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) =>
+                            const LoginARS(useOnlyCallPermission: true),
+                  ),
+                );
+              },
+              child: const Text('ARS 로그인 (전화 권한만)'),
             ),
             const SizedBox(height: 20),
             ElevatedButton(

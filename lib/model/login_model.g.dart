@@ -37,6 +37,7 @@ const _$AuthStatusEnumMap = {
   AuthStatus.loading: 'loading',
   AuthStatus.waitingForAppReturn: 'waitingForAppReturn',
   AuthStatus.confirming: 'confirming',
+  AuthStatus.manualInputRequired: 'manualInputRequired',
   AuthStatus.success: 'success',
   AuthStatus.failure: 'failure',
 };

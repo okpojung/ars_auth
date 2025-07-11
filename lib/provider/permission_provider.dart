@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'dart:io';
 import '../model/login_model.dart';
 import '../model/enum_list.dart';
 
@@ -19,7 +20,7 @@ class PermissionNotifier extends _$PermissionNotifier {
     try {
       final permissions = [
         Permission.microphone,
-        Permission.phone,
+        if (Platform.isAndroid) Permission.phone, // Android에서만 phone 권한 요청
         Permission.contacts,
         Permission.camera,
         Permission.locationWhenInUse,
@@ -38,10 +39,16 @@ class PermissionNotifier extends _$PermissionNotifier {
         denied.add(PermissionType.microphone);
       }
 
-      if (statuses[Permission.phone]?.isGranted ?? false) {
-        granted.add(PermissionType.phone);
+      // Android에서만 phone 권한 확인
+      if (Platform.isAndroid) {
+        if (statuses[Permission.phone]?.isGranted ?? false) {
+          granted.add(PermissionType.phone);
+        } else {
+          denied.add(PermissionType.phone);
+        }
       } else {
-        denied.add(PermissionType.phone);
+        // iOS에서는 phone 권한이 자동으로 승인된 것으로 처리
+        granted.add(PermissionType.phone);
       }
 
       if (statuses[Permission.contacts]?.isGranted ?? false) {
@@ -91,8 +98,55 @@ class PermissionNotifier extends _$PermissionNotifier {
     }
   }
 
+  // 전화 권한만 요청 (Only Call Permission)
+  Future<void> requestOnlyCallPermission() async {
+    try {
+      final granted = <PermissionType>{};
+      final denied = <PermissionType>{};
+
+      if (Platform.isIOS) {
+        // iOS에서는 전화 권한이 필요하지 않으므로 바로 승인 처리
+        granted.add(PermissionType.phone);
+
+        state = state.copyWith(
+          isPermissionGranted: true,
+          grantedPermissions: granted,
+          deniedPermissions: denied,
+        );
+        return;
+      }
+
+      // Android에서만 전화 권한 요청
+      final phonePermissionStatus = await Permission.phone.request();
+
+      if (phonePermissionStatus.isGranted) {
+        granted.add(PermissionType.phone);
+      } else {
+        denied.add(PermissionType.phone);
+      }
+
+      state = state.copyWith(
+        isPermissionGranted: phonePermissionStatus.isGranted,
+        grantedPermissions: granted,
+        deniedPermissions: denied,
+      );
+    } catch (e) {
+      // 권한 요청 실패 시 처리
+      state = state.copyWith(
+        isPermissionGranted: false,
+        grantedPermissions: {},
+        deniedPermissions: {PermissionType.phone},
+      );
+    }
+  }
+
   // 개별 권한 상태 확인
   Future<bool> checkPermission(PermissionType permissionType) async {
+    // iOS에서 phone 권한은 항상 true 반환
+    if (Platform.isIOS && permissionType == PermissionType.phone) {
+      return true;
+    }
+
     Permission permission;
 
     switch (permissionType) {
@@ -164,7 +218,9 @@ class PermissionNotifier extends _$PermissionNotifier {
 Future<bool> isPermissionGranted(Ref ref) async {
   // 필수 권한들을 실시간으로 확인
   final microphoneGranted = await Permission.microphone.isGranted;
-  final phoneGranted = await Permission.phone.isGranted;
+
+  // iOS에서는 phone 권한이 필요하지 않으므로 true로 처리
+  final phoneGranted = Platform.isIOS ? true : await Permission.phone.isGranted;
 
   return microphoneGranted && phoneGranted;
 }

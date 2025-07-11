@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:logger/logger.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 
 class PhoneChecker {
   static final Logger _logger = Logger();
@@ -46,15 +45,18 @@ class PhoneChecker {
         }
       }
 
-      // 2. 전화 권한 확인
-      final phonePermission = await Permission.phone.status;
-      if (phonePermission.isDenied) {
-        return PhoneCapabilityResult(
-          canMakeCall: false,
-          reason: '전화 권한이 필요합니다.',
-          recommendedAction: '설정에서 전화 권한을 허용해주세요.',
-        );
+      // 2. 전화 권한 확인 (Android에서만)
+      if (Platform.isAndroid) {
+        final phonePermission = await Permission.phone.status;
+        if (phonePermission.isDenied) {
+          return PhoneCapabilityResult(
+            canMakeCall: false,
+            reason: '전화 권한이 필요합니다.',
+            recommendedAction: '설정에서 전화 권한을 허용해주세요.',
+          );
+        }
       }
+      // iOS에서는 전화 권한 체크를 건너뜀
 
       // 3. 통화 기능 테스트 (실제 전화를 걸지 않고 권한만 확인) - claude ai agent가 구현한 최악의 쓰레기 코드 지우지 말고 참고해라.
       // try {

@@ -4,7 +4,6 @@ import 'package:logger/logger.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../model/login_model.dart';
 import '../repository/network_repository.dart';
-import '../repository/hive_repository.dart';
 import '../utils/phone_checker.dart';
 
 part 'login_provider.g.dart';
@@ -151,12 +150,10 @@ class LoginNotifier extends _$LoginNotifier {
       }
 
       final networkRepository = ref.read(networkRepositoryProvider.notifier);
-      final hiveRepository = ref.read(hiveRepositoryProvider.notifier);
 
       // 2. 앱 라이프사이클 기반 ARS 인증 실행
       // 반환값은 임시 객체이므로 사용하지 않음
       await networkRepository.executeArsAuthenticationWithLifecycle(
-        hiveRepository,
         _onPhoneCallCompleted,
       );
 
@@ -204,11 +201,9 @@ class LoginNotifier extends _$LoginNotifier {
 
     try {
       final networkRepository = ref.read(networkRepositoryProvider.notifier);
-      final hiveRepository = ref.read(hiveRepositoryProvider.notifier);
 
       final result = await networkRepository.executeConfirmAuthentication(
         _installData,
-        hiveRepository,
       );
 
       // 수동 인증이 필요한 경우가 아닐 때만 installData 초기화
@@ -299,7 +294,6 @@ class LoginNotifier extends _$LoginNotifier {
 
     try {
       final networkRepository = ref.read(networkRepositoryProvider.notifier);
-      final hiveRepository = ref.read(hiveRepositoryProvider.notifier);
 
       // 수동 인증 확인 요청 (install API의 appuuid 사용)
       final result = await networkRepository.requestManualConfirm(
@@ -308,16 +302,7 @@ class LoginNotifier extends _$LoginNotifier {
       );
 
       if (result.callCount == 1) {
-        // 인증 성공
-        await hiveRepository.saveUserData({
-          'appuuid': result.appuuid,
-          'appsid': result.appsid,
-          'prnts_phone_no': result.prntsPhoneNo,
-          'app_cid': result.appCid,
-          'isLogged': true,
-        });
-
-        // 수동 인증 완료 후 installData 초기화
+        // 인증 성공 - 수동 인증 완료 후 installData 초기화
         _installData = null;
 
         state = state.copyWith(
@@ -350,18 +335,4 @@ class LoginNotifier extends _$LoginNotifier {
       _onAuthFailure?.call(errorMsg);
     }
   }
-}
-
-// 로그인 상태 확인 Provider
-@riverpod
-Future<bool> isLoggedIn(Ref ref) async {
-  final hiveRepository = ref.read(hiveRepositoryProvider.notifier);
-  return hiveRepository.isLoggedIn();
-}
-
-// 사용자 정보 Provider
-@riverpod
-Future<Map<String, dynamic>> userInfo(Ref ref) async {
-  final hiveRepository = ref.read(hiveRepositoryProvider.notifier);
-  return hiveRepository.getUserData();
 }

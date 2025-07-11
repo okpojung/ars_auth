@@ -7,7 +7,7 @@ part of 'permission_provider.dart';
 // **************************************************************************
 
 String _$isPermissionGrantedHash() =>
-    r'fe6a3f78735a8939f7b8de3020b5c2b99c1349e7';
+    r'a2ed486d9724d799e99f3528dd26cd16501d42b3';
 
 /// See also [isPermissionGranted].
 @ProviderFor(isPermissionGranted)
@@ -25,7 +25,7 @@ final isPermissionGrantedProvider = AutoDisposeFutureProvider<bool>.internal(
 // ignore: unused_element
 typedef IsPermissionGrantedRef = AutoDisposeFutureProviderRef<bool>;
 String _$permissionNotifierHash() =>
-    r'74968e93e123991469a19e399d86508c3c0c03ef';
+    r'22647db7c3657e340291c5626381264e795ef461';
 
 /// See also [PermissionNotifier].
 @ProviderFor(PermissionNotifier)

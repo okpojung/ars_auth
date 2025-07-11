@@ -11,7 +11,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../model/login_model.dart';
 import '../res/constants.dart';
-import 'hive_repository.dart';
 
 part 'network_repository.g.dart';
 
@@ -155,7 +154,6 @@ class NetworkRepository extends _$NetworkRepository {
 
   // ARS 인증 프로세스 실행 (앱 라이프사이클 기반)
   Future<ArsAuthResponse> executeArsAuthenticationWithLifecycle(
-    HiveRepository hiveRepository,
     Function(dynamic installData) onPhoneCallCompleted,
   ) async {
     try {
@@ -165,7 +163,6 @@ class NetworkRepository extends _$NetworkRepository {
       // 2. 전화 걸기
       final phoneNumber = installJson['phonenum'].toString().substring(1);
       final phoneCall = 'tel:+$phoneNumber';
-
 
       // final phoneNumber1 = installJson['phonenum']
       //     .replaceFirst('+82', '0')
@@ -207,7 +204,6 @@ class NetworkRepository extends _$NetworkRepository {
   // Confirm API 호출 (별도 메서드)
   Future<ArsAuthResponse> executeConfirmAuthentication(
     dynamic installData,
-    HiveRepository hiveRepository,
   ) async {
     try {
       _logger.i('Confirm API 호출 시작...');
@@ -215,15 +211,10 @@ class NetworkRepository extends _$NetworkRepository {
       // 인증 확인
       final confirmData = await requestArsConfirm(installData);
 
-      // 인증 결과 저장
+      // 인증 결과는 콜백으로 전달하고 로컬 저장하지 않음
+      // 패키지 사용자가 원하는 방식으로 데이터를 저장하도록 함
       if (confirmData.callCount == 1) {
-        await hiveRepository.saveUserData({
-          'appuuid': confirmData.appuuid,
-          'appsid': confirmData.appsid,
-          'prnts_phone_no': confirmData.prntsPhoneNo,
-          'app_cid': confirmData.appCid,
-          'isLogged': true,
-        });
+        // 인증 성공 - 콜백에서 데이터 처리
       } else if (confirmData.callCount == 2) {
         //ars 수동인증 프로세스 실행
       } else if (confirmData.callCount == 0) {

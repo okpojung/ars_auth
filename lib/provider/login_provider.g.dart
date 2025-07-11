@@ -6,40 +6,7 @@ part of 'login_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$isLoggedInHash() => r'ac0f33cf4e612ee03be8616ca643be93f83e8fed';
-
-/// See also [isLoggedIn].
-@ProviderFor(isLoggedIn)
-final isLoggedInProvider = AutoDisposeFutureProvider<bool>.internal(
-  isLoggedIn,
-  name: r'isLoggedInProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$isLoggedInHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef IsLoggedInRef = AutoDisposeFutureProviderRef<bool>;
-String _$userInfoHash() => r'6f27a9c647c36f52d186d0609df5542c52753c30';
-
-/// See also [userInfo].
-@ProviderFor(userInfo)
-final userInfoProvider =
-    AutoDisposeFutureProvider<Map<String, dynamic>>.internal(
-  userInfo,
-  name: r'userInfoProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$userInfoHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef UserInfoRef = AutoDisposeFutureProviderRef<Map<String, dynamic>>;
-String _$loginNotifierHash() => r'bb429c0e0970fa5c425792891b7e9c22250077e3';
+String _$loginNotifierHash() => r'e5cf05e56fe83888618be55ddd8472bb465f7461';
 
 /// See also [LoginNotifier].
 @ProviderFor(LoginNotifier)

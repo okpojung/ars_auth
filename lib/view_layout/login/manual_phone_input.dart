@@ -283,13 +283,13 @@ class _ManualPhoneInputState extends ConsumerState<ManualPhoneInput> {
 
     if (loginState.status == AuthStatus.success && mounted) {
       // 성공 시 완료 화면으로 이동
-      final userInfo = await ref.read(userInfoProvider.future);
+      // 패키지에서는 데이터를 저장하지 않으므로 입력된 전화번호 사용
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder:
               (context) => LoginComplete(
-                phoneNumber: userInfo['app_cid'] ?? phoneNumber,
-                recommenderPhoneNumber: userInfo['prnts_phone_no'],
+                phoneNumber: phoneNumber,
+                recommenderPhoneNumber: null,
               ),
         ),
       );

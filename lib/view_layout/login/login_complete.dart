@@ -62,7 +62,7 @@ class _LoginCompleteState extends ConsumerState<LoginComplete> {
                 width: 150,
                 height: 150,
                 decoration: BoxDecoration(
-                  color: CustomColors.confirmButton.withOpacity(0.1),
+                  color: CustomColors.confirmButton.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(

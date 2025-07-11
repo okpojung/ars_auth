@@ -23,12 +23,6 @@ lib/
 │   ├── main_provider.dart          # 메인 상태
 │   ├── ...
 │   └── ...
-├── go_router/            # 라우팅 관리
-│   ├── go_router_provider.dart # 라우터 설정
-│   └── route_name.dart        # 라우트 이름 상수
-├── repository/           # 데이터 저장소
-│   ├── hive_repository.dart    # Hive 로컬 데이터베이스
-│   └── provider/               # 저장소 관련 Provider
 ├── res/                  # 리소스 및 상수
 │   ├── custom_theme.dart       # 커스텀 테마
 │   ├── custom_colors.dart      # 커스텀 색상
@@ -47,13 +41,6 @@ lib/
 # 데이터 모델링
 - **freezed**: 불변 데이터 클래스 생성
 - **json_annotation**: JSON 직렬화
-
-# 네비게이션
-- **go_router**: 선언적 라우팅
-
-# 로컬 데이터베이스
-- **hive**: NoSQL 로컬 데이터베이스
-- **hive_flutter**: Flutter 통합
 
 # UI/UX
 - **google_fonts**: 구글 폰트

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'dart:io';
 import '../../model/enum_list.dart';
 import '../../model/login_model.dart';
 import '../../provider/login_provider.dart';
@@ -19,6 +21,7 @@ class LoginARS extends ConsumerStatefulWidget {
   final ArsAuthCompleteCallback? onAuthComplete;
   final ArsAuthFailureCallback? onAuthFailure;
   final ArsManualInputCallback? onManualInputRequired;
+  final bool useOnlyCallPermission;
 
   const LoginARS({
     super.key,
@@ -26,6 +29,7 @@ class LoginARS extends ConsumerStatefulWidget {
     this.onAuthComplete,
     this.onAuthFailure,
     this.onManualInputRequired,
+    this.useOnlyCallPermission = false,
   });
 
   @override
@@ -86,17 +90,17 @@ class _LoginARSState extends ConsumerState<LoginARS>
     final loginNotifier = ref.read(loginNotifierProvider.notifier);
 
     // 인증 성공 시 콜백이 없는 경우에만 기본 LoginComplete 화면으로 이동
+    // 하지만 패키지에서는 데이터를 저장하지 않으므로 콜백 없이는 사용할 수 없음
     if (loginState.status == AuthStatus.success &&
         widget.onAuthComplete == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        final userInfo = await ref.read(userInfoProvider.future);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder:
-                (context) => LoginComplete(
-                  phoneNumber: userInfo['app_cid'] ?? '',
-                  recommenderPhoneNumber: userInfo['prnts_phone_no'],
+                (context) => const LoginComplete(
+                  phoneNumber: '',
+                  recommenderPhoneNumber: null,
                 ),
           ),
         );
@@ -335,14 +339,48 @@ class _LoginARSState extends ConsumerState<LoginARS>
       return;
     }
 
-    // 2. 권한 확인
-    if (!await ref.read(isPermissionGrantedProvider.future)) {
-      if (!context.mounted) return;
+    // 2. 권한 확인 및 요청
+    if (widget.useOnlyCallPermission) {
+      // 전화 권한만 요청하는 경우 (플랫폼별 처리)
+      if (Platform.isIOS) {
+        // iOS에서는 전화 권한이 필요 없음 (tel: URL scheme 사용)
+        debugPrint('iOS: 전화 권한 불필요, ARS 인증을 바로 진행합니다.');
+        // iOS에서는 권한 체크를 건너뛰고 바로 ARS 인증 시작
+      } else {
+        // Android에서만 phone 권한 요청
+        final phoneStatus = await Permission.phone.status;
 
-      final result = await Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => const PermissionManager()),
-      );
-      if (result != true) return;
+        if (phoneStatus.isDenied) {
+          final result = await Permission.phone.request();
+          if (result.isDenied) {
+            if (context.mounted) {
+              loginNotifier.state = loginNotifier.state.copyWith(
+                status: AuthStatus.failure,
+                errorMessage: '전화 권한이 필요합니다. 설정에서 전화권한을 허용해주세요',
+              );
+            }
+            return;
+          }
+        } else if (phoneStatus.isPermanentlyDenied) {
+          if (context.mounted) {
+            loginNotifier.state = loginNotifier.state.copyWith(
+              status: AuthStatus.failure,
+              errorMessage: '전화 권한이 필요합니다. 설정에서 전화권한을 허용해주세요',
+            );
+          }
+          return;
+        }
+      }
+    } else {
+      // 기존 전체 권한 요청 로직
+      if (!await ref.read(isPermissionGrantedProvider.future)) {
+        if (!context.mounted) return;
+
+        final result = await Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => const PermissionManager()),
+        );
+        if (result != true) return;
+      }
     }
 
     // 3. ARS 인증 시작

@@ -1,6 +1,6 @@
 name: ars_login
 description: "한국의 ARS(자동응답시스템) 인증을 위한 Flutter 패키지. 전화 인증, 약관 동의, 권한 관리 등 통합 인증 솔루션 제공."
-version: 1.0.0
+version: 1.1.0
 homepage: https://github.com/your-username/ars_login
 repository: https://github.com/your-username/ars_login
 issue_tracker: https://github.com/your-username/ars_login/issues
@@ -20,10 +20,6 @@ dependencies:
   # 데이터 모델링
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0
-
-  # 로컬 데이터베이스
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
 
   # 네트워크
   dio: ^5.7.0
