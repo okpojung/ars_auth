@@ -20,9 +20,9 @@ class AppConstants {
 
   // 약관 URL (로컬 assets 사용)
   static const String termsOfServiceUrl =
-      'assets/html/terms_of_service.html';
+      'packages/ars_login/assets/html/terms_of_service.html';
   static const String privacyPolicyUrl =
-      'assets/html/privacy_policy.html';
+      'packages/ars_login/assets/html/privacy_policy.html';
   
   // 외부 URL (백업용)
   static const String termsOfServiceUrlRemote =
