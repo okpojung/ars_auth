@@ -2,6 +2,15 @@
 
 한국의 ARS(자동응답시스템) 인증을 위한 Flutter 패키지입니다.
 
+## 🆕 v1.2.0 업데이트 (2026-03)
+
+- **📱 로컬 HTML 전환**: 약관/개인정보처리방침을 네트워크에서 로컬 assets으로 변경
+- **🎨 폰트 최적화**: HTML 폰트 크기 및 WebView 설정 최적화
+- **🔧 WebView 안정화**: 빈 화면 문제 해결 및 에러 처리 강화
+- **🌐 네트워크 보안**: Android 9+ 및 iOS ATS 설정 추가
+- **📚 문서 개선**: 상세한 트러블슈팅 가이드 추가
+- **⚡ 오프라인 지원**: 네트워크 없이도 약관 표시 가능
+
 ## 🆕 v1.1.0 업데이트 (2024-01)
 
 - **🔥 Breaking Changes**: Hive 로컬 저장소 의존성 제거
@@ -41,11 +50,13 @@ LoginARS(
 
 - 🔐 **ARS 자동 인증**: 전화 수신을 통한 자동 인증
 - 📱 **수동 전화번호 입력**: ARS 실패 시 수동 인증 지원  
-- 📋 **약관 동의 UI**: 이용약관 및 개인정보처리방침 동의
+- 📋 **약관 동의 UI**: 이용약관 및 개인정보처리방침 동의 (로컬 HTML)
+- 🌐 **오프라인 지원**: 네트워크 없이도 약관 표시
 - 🔒 **권한 관리**: 필요한 권한들의 자동 요청 및 관리
 - 🎨 **콜백 전용**: 완전한 콜백 기반 데이터 처리
 - 📱 **Portrait 모드 고정**: 화면 회전 시 UI 깨짐 방지
 - ⚡ **경량화**: Hive 의존성 제거로 패키지 크기 최적화
+- 🎯 **폰트 최적화**: 약관 페이지 가독성 개선
 
 ## 📋 요구사항
 
@@ -63,8 +74,8 @@ dependencies:
   flutter_riverpod: ^2.6.1  # 필수!
   ars_login:
     git:
-      url: https://github.com/dev-jkyang/ars_login.git
-      ref: main
+      url: https://github.com/okpojung/ars_auth.git
+      ref: main  # 또는 특정 커밋: 060b1bc
 ```
 
 ### 2. 패키지 설치
@@ -91,19 +102,64 @@ void main() {
 
 `android/app/src/main/AndroidManifest.xml`:
 ```xml
-<uses-permission android:name="android.permission.CALL_PHONE" />
-<uses-permission android:name="android.permission.READ_PHONE_STATE" />
-<uses-permission android:name="android.permission.INTERNET" />
+<manifest>
+  <!-- 필수 권한 -->
+  <uses-permission android:name="android.permission.CALL_PHONE" />
+  <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+  <uses-permission android:name="android.permission.INTERNET" />
+  
+  <application
+    android:networkSecurityConfig="@xml/network_security_config"
+    android:usesCleartextTraffic="true">
+    <!-- ... -->
+  </application>
+</manifest>
+```
+
+네트워크 보안 설정 파일 생성:
+`android/app/src/main/res/xml/network_security_config.xml`
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">mobile.barosvc.com</domain>
+    </domain-config>
+</network-security-config>
 ```
 
 ### 3. iOS 권한 설정
 
 `ios/Runner/Info.plist`:
 ```xml
-<key>NSMicrophoneUsageDescription</key>
-<string>ARS 인증을 위해 마이크 권한이 필요합니다.</string>
-<key>NSContactsUsageDescription</key>
-<string>연락처 접근을 위해 권한이 필요합니다.</string>
+<dict>
+  <!-- 기본 권한 설명 -->
+  <key>NSMicrophoneUsageDescription</key>
+  <string>ARS 인증을 위해 마이크 권한이 필요합니다.</string>
+  <key>NSContactsUsageDescription</key>
+  <string>연락처 접근을 위해 권한이 필요합니다.</string>
+  
+  <!-- ATS (App Transport Security) 예외 설정 -->
+  <key>NSAppTransportSecurity</key>
+  <dict>
+    <key>NSAllowsArbitraryLoads</key>
+    <false/>
+    <key>NSExceptionDomains</key>
+    <dict>
+      <key>mobile.barosvc.com</key>
+      <dict>
+        <key>NSExceptionAllowsInsecureHTTPLoads</key>
+        <true/>
+        <key>NSIncludesSubdomains</key>
+        <true/>
+      </dict>
+    </dict>
+  </dict>
+</dict>
 ```
 
 ## 📖 사용법
@@ -260,7 +316,7 @@ flutter pub add flutter_riverpod shared_preferences
 dependencies:
   ars_login:
     git:
-      url: https://github.com/dev-jkyang/ars_login.git
+      url: https://github.com/okpojung/ars_auth.git
 ```
 
 ### 2단계: main.dart 설정
@@ -334,6 +390,29 @@ flutter run
 
 ## 🔧 문제 해결
 
+### Q: 약관 페이지가 빈 화면으로 나와요
+A: 
+1. 패키지를 최신 버전으로 업데이트 (v1.2.0+)
+2. `flutter pub cache clean && flutter pub get` 실행
+3. 앱을 완전히 종료 후 재실행
+4. 로그 확인: `🔍 로드 시도: packages/ars_login/assets/html/...`
+
+자세한 가이드: [WEBVIEW_TROUBLESHOOTING.md](WEBVIEW_TROUBLESHOOTING.md)
+
+### Q: 약관 페이지 폰트가 너무 크거나 작아요
+A:
+1. HTML 파일의 `font-size` 조정
+2. WebView의 `textZoom` 설정 조정
+
+자세한 가이드: [FONT_SIZE_GUIDE.md](FONT_SIZE_GUIDE.md)
+
+### Q: 네트워크 에러 (ERR_CLEARTEXT_NOT_PERMITTED)가 나요
+A:
+1. Android: `network_security_config.xml` 파일 추가
+2. iOS: `NSAppTransportSecurity` 설정 추가
+
+자세한 가이드: [PACKAGE_ASSETS_FIX.md](PACKAGE_ASSETS_FIX.md)
+
 ### Q: "통화 기능을 사용할 수 없습니다" 에러가 나요
 A: 
 1. 통화 권한이 허용되었는지 확인
@@ -377,6 +456,14 @@ A: iOS는 시스템 설정에서 권한을 직접 설정해야 할 수 있습니
 
 ## 📝 변경 이력
 
+### v1.2.0 (2026-03-10)
+- **로컬 HTML 전환**: 약관을 네트워크에서 로컬 assets으로 변경
+- **WebView 최적화**: 빈 화면 문제 해결 및 에러 처리 강화
+- **폰트 최적화**: HTML 폰트 크기 및 WebView textZoom 조정
+- **네트워크 보안**: Android 9+ cleartext traffic 및 iOS ATS 설정 추가
+- **오프라인 지원**: 인터넷 없이도 약관 표시 가능
+- **문서 추가**: FONT_SIZE_GUIDE, LOCAL_HTML_GUIDE, WEBVIEW_TROUBLESHOOTING 등
+
 ### v1.1.0 (2024-01-07)
 - **BREAKING CHANGE**: Hive 로컬 저장소 의존성 제거
 - 콜백 전용 아키텍처로 전환
@@ -388,3 +475,26 @@ A: iOS는 시스템 설정에서 권한을 직접 설정해야 할 수 있습니
 - 초기 릴리스
 - ARS 자동 인증 기능
 - Hive 기반 로컬 저장소
+
+## 📚 추가 문서
+
+프로젝트에는 다음과 같은 상세 가이드 문서들이 포함되어 있습니다:
+
+- **[FONT_SIZE_GUIDE.md](FONT_SIZE_GUIDE.md)** - 약관 페이지 폰트 크기 조정 완벽 가이드
+- **[LOCAL_HTML_GUIDE.md](LOCAL_HTML_GUIDE.md)** - 로컬 HTML assets 사용 가이드
+- **[PACKAGE_ASSETS_FIX.md](PACKAGE_ASSETS_FIX.md)** - 패키지 assets 경로 문제 해결
+- **[WEBVIEW_TROUBLESHOOTING.md](WEBVIEW_TROUBLESHOOTING.md)** - WebView 관련 문제 해결
+- **[pubspec_bs_point.yaml](pubspec_bs_point.yaml)** - 사용자 앱 pubspec 예시
+
+## 🤝 기여
+
+기여는 언제나 환영합니다! 이슈나 PR을 자유롭게 제출해 주세요.
+
+## 📄 라이선스
+
+이 프로젝트는 MIT 라이선스를 따릅니다.
+
+## 📞 지원
+
+- **GitHub Issues**: https://github.com/okpojung/ars_auth/issues
+- **Pull Requests**: https://github.com/okpojung/ars_auth/pulls
