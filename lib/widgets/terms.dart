@@ -159,7 +159,7 @@ class _TermsScreenState extends State<TermsScreen> {
                                 domStorageEnabled: true,
                                 transparentBackground: false,
                                 backgroundColor: Colors.white,
-                                textZoom: 220,
+                                textZoom: 100,
                                 useHybridComposition: true,
                                 clearCache: false,
                                 cacheEnabled: true,
