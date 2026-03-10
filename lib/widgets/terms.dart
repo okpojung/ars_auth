@@ -19,6 +19,7 @@ class _TermsScreenState extends State<TermsScreen> {
   InAppWebViewController? webViewController;
   bool isLoading = true;
   double progress = 0;
+  String? errorMessage;
 
   @override
   void initState() {
@@ -115,60 +116,107 @@ class _TermsScreenState extends State<TermsScreen> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12.0),
-                  child: InAppWebView(
-                    initialUrlRequest: URLRequest(
-                      url: WebUri(widget.termsType.url),
-                    ),
-                    initialSettings: InAppWebViewSettings(
-                      useShouldOverrideUrlLoading: true,
-                      mediaPlaybackRequiresUserGesture: false,
-                      allowsInlineMediaPlayback: true,
-                      verticalScrollBarEnabled: true,
-                      horizontalScrollBarEnabled: false,
-                      disableHorizontalScroll: true,
-                      supportZoom: false,
-                      javaScriptEnabled: true,
-                      domStorageEnabled: true,
-                      transparentBackground: true,
-                      textZoom: 220,
-                    ),
-                    onWebViewCreated: (controller) {
-                      webViewController = controller;
-                    },
-                    onLoadStart: (controller, url) {
-                      setState(() {
-                        isLoading = true;
-                        progress = 0;
-                      });
-                    },
-                    onProgressChanged: (controller, progress) {
-                      setState(() {
-                        this.progress = progress / 100;
-                      });
-                    },
-                    onLoadStop: (controller, url) async {
-                      setState(() {
-                        isLoading = false;
-                      });
-                    },
-                    onReceivedError: (controller, request, error) {
-                      setState(() {
-                        isLoading = false;
-                      });
-                    },
-                    shouldOverrideUrlLoading: (
-                      controller,
-                      navigationAction,
-                    ) async {
-                      // 외부 링크는 현재 WebView에서 로드하지 않음
-                      final uri = navigationAction.request.url;
-                      if (uri != null &&
-                          !uri.toString().contains('mobile.barosvc.com')) {
-                        return NavigationActionPolicy.CANCEL;
-                      }
-                      return NavigationActionPolicy.ALLOW;
-                    },
-                  ),
+                  child: errorMessage != null
+                      ? _buildErrorWidget()
+                      : InAppWebView(
+                          initialUrlRequest: URLRequest(
+                            url: WebUri(widget.termsType.url),
+                          ),
+                          initialSettings: InAppWebViewSettings(
+                            useShouldOverrideUrlLoading: true,
+                            mediaPlaybackRequiresUserGesture: false,
+                            allowsInlineMediaPlayback: true,
+                            verticalScrollBarEnabled: true,
+                            horizontalScrollBarEnabled: false,
+                            disableHorizontalScroll: true,
+                            supportZoom: false,
+                            javaScriptEnabled: true,
+                            domStorageEnabled: true,
+                            transparentBackground: false,
+                            backgroundColor: Colors.white,
+                            textZoom: 220,
+                            // 추가 설정
+                            useHybridComposition: true,
+                            clearCache: false,
+                            cacheEnabled: true,
+                            mixedContentMode:
+                                MixedContentMode.MIXED_CONTENT_ALWAYS_ALLOW,
+                          ),
+                          onWebViewCreated: (controller) {
+                            webViewController = controller;
+                            print('✅ WebView 생성됨: ${widget.termsType.url}');
+                          },
+                          onLoadStart: (controller, url) {
+                            print('🔄 로딩 시작: $url');
+                            setState(() {
+                              isLoading = true;
+                              progress = 0;
+                              errorMessage = null;
+                            });
+                          },
+                          onProgressChanged: (controller, progress) {
+                            print('📊 로딩 진행: $progress%');
+                            setState(() {
+                              this.progress = progress / 100;
+                            });
+                          },
+                          onLoadStop: (controller, url) async {
+                            print('✅ 로딩 완료: $url');
+                            setState(() {
+                              isLoading = false;
+                            });
+                            
+                            // 페이지가 실제로 로드되었는지 확인
+                            final html = await controller.evaluateJavascript(
+                              source: 'document.body.innerHTML',
+                            );
+                            if (html == null || html.toString().isEmpty) {
+                              setState(() {
+                                errorMessage = '페이지 내용을 불러올 수 없습니다.';
+                              });
+                            }
+                          },
+                          onReceivedError: (controller, request, error) {
+                            print('❌ WebView 에러: ${error.description}');
+                            setState(() {
+                              isLoading = false;
+                              errorMessage =
+                                  '페이지를 불러올 수 없습니다.\n\n에러 코드: ${error.type}\n${error.description}';
+                            });
+                          },
+                          onReceivedHttpError:
+                              (controller, request, errorResponse) {
+                            print(
+                              '❌ HTTP 에러: ${errorResponse.statusCode}',
+                            );
+                            setState(() {
+                              isLoading = false;
+                              errorMessage =
+                                  'HTTP 에러가 발생했습니다.\n상태 코드: ${errorResponse.statusCode}';
+                            });
+                          },
+                          shouldOverrideUrlLoading: (
+                            controller,
+                            navigationAction,
+                          ) async {
+                            // 외부 링크는 현재 WebView에서 로드하지 않음
+                            final uri = navigationAction.request.url;
+                            if (uri != null &&
+                                !uri
+                                    .toString()
+                                    .contains('mobile.barosvc.com')) {
+                              print('⛔ 외부 링크 차단: $uri');
+                              return NavigationActionPolicy.CANCEL;
+                            }
+                            return NavigationActionPolicy.ALLOW;
+                          },
+                          onConsoleMessage: (controller, consoleMessage) {
+                            // 디버깅용 콘솔 로그
+                            print(
+                              '🖥️ [Console] ${consoleMessage.messageLevel}: ${consoleMessage.message}',
+                            );
+                          },
+                        ),
                 ),
               ),
             ),
@@ -206,6 +254,52 @@ class _TermsScreenState extends State<TermsScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // 에러 표시 위젯
+  Widget _buildErrorWidget() {
+    return Container(
+      color: CustomColors.surface,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                color: CustomColors.negative,
+                size: 64,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                errorMessage ?? '알 수 없는 오류가 발생했습니다.',
+                style: CustomTheme.bodyText.copyWith(
+                  color: CustomColors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () {
+                  setState(() {
+                    errorMessage = null;
+                    isLoading = true;
+                  });
+                  webViewController?.reload();
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('다시 시도'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: CustomColors.confirmButton,
+                  foregroundColor: CustomColors.surface,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
