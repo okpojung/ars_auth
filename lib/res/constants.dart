@@ -18,10 +18,16 @@ class AppConstants {
   // 음성인식 후처리 API
   static const String hoServerApi = 'https://barocall.baro.so/baro_call.php';
 
-  // 약관 URL
+  // 약관 URL (로컬 assets 사용)
   static const String termsOfServiceUrl =
-      'https://mobile.barosvc.com/info/use_info2.html';
+      'packages/ars_login/assets/html/terms_of_service.html';
   static const String privacyPolicyUrl =
+      'packages/ars_login/assets/html/privacy_policy.html';
+  
+  // 외부 URL (백업용)
+  static const String termsOfServiceUrlRemote =
+      'https://mobile.barosvc.com/info/use_info2.html';
+  static const String privacyPolicyUrlRemote =
       'https://mobile.barosvc.com/info/privacy2.html';
 
   // 폰트 패밀리
