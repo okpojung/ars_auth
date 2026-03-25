@@ -83,11 +83,11 @@ _$PermissionStateImpl _$$PermissionStateImplFromJson(
       grantedPermissions: (json['grantedPermissions'] as List<dynamic>?)
               ?.map((e) => $enumDecode(_$PermissionTypeEnumMap, e))
               .toSet() ??
-          const {},
+          const <PermissionType>{},
       deniedPermissions: (json['deniedPermissions'] as List<dynamic>?)
               ?.map((e) => $enumDecode(_$PermissionTypeEnumMap, e))
               .toSet() ??
-          const {},
+          const <PermissionType>{},
     );
 
 Map<String, dynamic> _$$PermissionStateImplToJson(
