@@ -1,5 +1,21 @@
 # 변경사항
 
+## [2.0.0] - 2026-10-31
+
+ars2fa 새 API(`https://ars2fa.baro.me`, `/v1/ars/*`)로 다시 작성했습니다. **1.x와 호환되지 않습니다.**
+
+### 바뀜
+- 구 PHP 엔드포인트(`install_app.php`, `confirm_auth.php`) 제거
+- 세션 생성 → 0507 번호로 즉시 발신(화면 비표시) → 상태 폴링(1.5초, 앱 복귀 시 즉시) → 결과
+- 남은 시간은 서버 시계(`server_time`) 기준으로 계산
+- `LoginARS(config: ...)`, `Ars2fa.authenticate()`, UI 없는 `ArsAuthController`, `Ars2faClient`
+- 결과 `ArsResult`(phone, phoneMasked, reason, errorCode, message)
+- 선택적 앱 무결성 훅(`integrityProvider`: Play Integrity / App Attest)
+- Android: CALL_PHONE 권한이 있으면 바로 발신, 없으면 다이얼러(`tel:`)
+
+### 제거
+- 약관/권한/수동 번호 입력 화면, Riverpod·Freezed·Dio·InAppWebView·Lottie 의존성, 관련 문서
+
 ## [1.1.0] - 2024-01-10
 
 ### 제거됨 🗑️
@@ -52,3 +68,4 @@
 - Android 시뮬레이터에서 통화 기능 제한
 - iOS 시뮬레이터에서 통화 기능 완전 제한
 - 백그라운드 앱 종료 시 인증 세션 만료 가능
+

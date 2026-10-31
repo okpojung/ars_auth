@@ -1,21 +1,26 @@
-// 메인 컴포넌트들
-export 'view_layout/login/login_ars.dart';
-export 'view_layout/login/login_complete.dart';
-export 'view_layout/permission/permission_manager.dart';
+/// ars2fa 발신 ARS 휴대폰 인증 SDK.
+library;
 
-// UI 위젯들
-export 'widgets/terms.dart';
-export 'widgets/terms_link_widget.dart';
-export 'widgets/custom_checkbox.dart';
-export 'widgets/permission_item_widget.dart';
+import 'package:flutter/material.dart';
 
-// 상태 관리 및 모델
-export 'provider/login_provider.dart';
-export 'provider/permission_provider.dart';
-export 'model/login_model.dart';
-export 'model/enum_list.dart';
+import 'src/config.dart';
+import 'src/login_ars.dart';
+import 'src/models.dart';
 
-// 유틸리티
-export 'utils/phone_formatter.dart';
-export 'utils/phone_checker.dart';
-export 'utils/custom_page_route.dart';
+export 'src/ars2fa_client.dart';
+export 'src/ars_auth_controller.dart';
+export 'src/config.dart';
+export 'src/dialer.dart';
+export 'src/login_ars.dart';
+export 'src/models.dart';
+
+/// 간단 사용: 인증 화면을 띄우고 결과를 돌려받는다. 사용자가 닫으면 실패(canceled_by_client) 또는 null.
+class Ars2fa {
+  Ars2fa._();
+
+  static Future<ArsResult?> authenticate(BuildContext context, Ars2faConfig config, {bool autoStart = true}) {
+    return Navigator.of(context).push<ArsResult>(
+      MaterialPageRoute(builder: (_) => LoginARS(config: config, autoStart: autoStart)),
+    );
+  }
+}

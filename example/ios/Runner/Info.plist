@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tel</string>
+	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -42,12 +46,24 @@
 	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tel</string>
+	</array>
 		<key>NSAllowsArbitraryLoads</key>
 		<false/>
 		<key>NSExceptionDomains</key>
 		<dict>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tel</string>
+	</array>
 			<key>mobile.barosvc.com</key>
 			<dict>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tel</string>
+	</array>
 				<key>NSIncludesSubdomains</key>
 				<true/>
 				<key>NSExceptionAllowsInsecureHTTPLoads</key>
@@ -57,6 +73,10 @@
 			</dict>
 			<key>barocall.baro.so</key>
 			<dict>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tel</string>
+	</array>
 				<key>NSIncludesSubdomains</key>
 				<true/>
 				<key>NSExceptionAllowsInsecureHTTPLoads</key>
