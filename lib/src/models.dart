@@ -76,6 +76,7 @@ class ArsSession {
     required this.integrity,
     required this.clockOffset,
     this.dialNumber,
+    this.confirmKey = true,
   });
 
   final String sessionId;
@@ -91,6 +92,9 @@ class ArsSession {
   final String displayName;
   final String notice;
   final String integrity;
+
+  /// true: 안내 후 1번을 눌러야 함 / false: 누를 필요 없이 바로 판정 (앱별 서버 설정).
+  final bool confirmKey;
 
   /// 서버 시계 - 기기 시계. 남은 시간 계산에 사용.
   final Duration clockOffset;
@@ -114,6 +118,7 @@ class ArsSession {
       notice: (j['notice'] as String?) ?? '',
       integrity: (j['integrity'] as String?) ?? 'NOT_PROVIDED',
       clockOffset: serverOffset(j['server_time'] as String?, now),
+      confirmKey: j['confirm_key'] is bool ? j['confirm_key'] as bool : true,
     );
   }
 

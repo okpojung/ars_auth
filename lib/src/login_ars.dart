@@ -157,7 +157,7 @@ class _LoginARSState extends State<LoginARS> with WidgetsBindingObserver {
           Text('요청한 서비스: ${s!.displayName}', style: theme.textTheme.bodyMedium),
         const SizedBox(height: 8),
         Text(
-          '통화가 연결되면 음성 안내에 따라 진행해 주세요. 안내에 따라 번호(예: 1번)를 눌러야 할 수 있습니다.',
+          (s?.confirmKey ?? true) ? '안내가 나오면 1번을 누르세요' : '전화가 연결되면 잠시 기다려 주세요',
           style: theme.textTheme.bodyLarge?.copyWith(height: 1.6),
         ),
         if ((s?.notice ?? '').isNotEmpty) ...[

@@ -4,7 +4,7 @@
 
 1. SDK가 ars2fa 서버(`https://ars2fa.baro.me`)에 인증을 요청하면, 서버가 이번 인증에만 쓸 0507 번호를 빌려줍니다(30초).
 2. SDK가 그 번호로 **바로 전화를 겁니다.** 번호는 어느 화면에도 표시하지 않습니다.
-3. 통화가 연결되면 음성 안내에 따라 진행합니다. 앱 설정에 따라 "1번을 누르세요" 안내가 나올 수 있습니다.
+3. 통화가 연결되면 음성 안내에 따라 진행합니다. 서버의 앱별 설정(`confirm_key`)이 켜져 있으면 대기 화면에 "안내가 나오면 1번을 누르세요", 꺼져 있으면 "전화가 연결되면 잠시 기다려 주세요"가 표시됩니다.
 4. 서버는 **통신사 기록(발신번호)**으로 휴대폰 번호를 확인하고, SDK는 결과(성공 시 번호)를 앱에 돌려줍니다.
 
 사용자는 번호를 입력하지 않습니다. 발신번호 숨김·유선전화·같은 번호로 2통 이상 걸린 경우 등은 실패합니다.
@@ -165,7 +165,7 @@ Ars2faConfig(
 
 | 경로 | 설명 |
 |---|---|
-| `POST /v1/ars/sessions` | 세션 생성(APP). `dial_uri`, `expires_at`, `server_time`, `notice` |
+| `POST /v1/ars/sessions` | 세션 생성(APP). `dial_uri`, `expires_at`, `server_time`, `notice`, `confirm_key`(1번 누르기 여부, 없으면 true) |
 | `POST /v1/ars/sessions/status` | `PENDING / CALL_CONFIRMED / VERIFIED / FAILED / EXPIRED / CANCELED` |
 | `POST /v1/ars/sessions/cancel` | 취소 |
 | `POST /v1/ars/integrity/challenge` | 1회용 nonce |

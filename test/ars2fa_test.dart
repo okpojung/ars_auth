@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
 
 import 'package:ars_login/ars_login.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -74,6 +77,9 @@ void main() {
       expect(s.clockOffset, const Duration(seconds: -2));
       expect(s.remaining(DateTime.parse('2026-10-31T08:00:12.000Z')), const Duration(seconds: 20));
       expect(s.toString(), isNot(contains('0507')));
+      expect(s.confirmKey, isTrue); // absent -> true
+      expect(ArsSession.fromJson({...sessionJson(), 'confirm_key': false}).confirmKey, isFalse);
+      expect(ArsSession.fromJson({...sessionJson(), 'confirm_key': true}).confirmKey, isTrue);
     });
 
     test('integrity proof fields are sent', () async {
@@ -195,5 +201,37 @@ void main() {
       expect(calls, contains('/v1/ars/sessions/cancel'));
       c.dispose();
     });
+  });
+
+  group('LoginARS waiting screen guidance', () {
+    Future<void> check(WidgetTester tester, bool confirmKey, String text) async {
+      final c = ArsAuthController(
+        config: cfg,
+        dialer: FakeDialer(),
+        client: Ars2faClient(cfg, httpClient: MockClient((req) async {
+          if (req.url.path.endsWith('/sessions')) {
+            return j({...sessionJson(serverTime: DateTime.now().toUtc().toIso8601String()), 'confirm_key': confirmKey}, 201);
+          }
+          if (req.url.path.endsWith('/cancel')) return j({'session_id': 'ars_abcdefghijkl', 'status': 'CANCELED'});
+          return j({'session_id': 'ars_abcdefghijkl', 'status': 'PENDING'});
+        })),
+      );
+      await tester.runAsync(() async {
+        unawaited(c.start());
+        for (var i = 0; i < 50 && c.phase != ArsAuthPhase.waitingCall; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+        }
+      });
+      await tester.pumpWidget(MaterialApp(home: LoginARS(config: cfg, controller: c)));
+      expect(c.phase, ArsAuthPhase.waitingCall);
+      expect(find.text(text), findsOneWidget);
+      expect(find.textContaining('0507'), findsNothing);
+      await tester.runAsync(() => c.cancel());
+      await tester.pumpWidget(const SizedBox());
+      c.dispose();
+    }
+
+    testWidgets('confirm_key true', (tester) => check(tester, true, '안내가 나오면 1번을 누르세요'));
+    testWidgets('confirm_key false', (tester) => check(tester, false, '전화가 연결되면 잠시 기다려 주세요'));
   });
 }

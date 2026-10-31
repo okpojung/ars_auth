@@ -8,6 +8,7 @@ ars2fa 새 API(`https://ars2fa.baro.me`, `/v1/ars/*`)로 다시 작성했습니�
 - 구 PHP 엔드포인트(`install_app.php`, `confirm_auth.php`) 제거
 - 세션 생성 → 0507 번호로 즉시 발신(화면 비표시) → 상태 폴링(1.5초, 앱 복귀 시 즉시) → 결과
 - 남은 시간은 서버 시계(`server_time`) 기준으로 계산
+- `confirm_key`(앱별 1번 누르기 설정) 반영: 대기 화면 문구 "안내가 나오면 1번을 누르세요" / "전화가 연결되면 잠시 기다려 주세요"
 - `LoginARS(config: ...)`, `Ars2fa.authenticate()`, UI 없는 `ArsAuthController`, `Ars2faClient`
 - 결과 `ArsResult`(phone, phoneMasked, reason, errorCode, message)
 - 선택적 앱 무결성 훅(`integrityProvider`: Play Integrity / App Attest)
