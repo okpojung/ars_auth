@@ -9,7 +9,10 @@ const _config = Ars2faConfig(
   packageName: String.fromEnvironment('ARS2FA_PACKAGE', defaultValue: 'com.example.example'),
   bundleId: String.fromEnvironment('ARS2FA_BUNDLE', defaultValue: 'com.example.example'),
   purpose: '로그인',
+  // --dart-define=ARS2FA_TYPE=0 (1번 누르기 없음) / 1 (1번 누르기). 지정하지 않으면 콘솔 앱 설정.
+  type: _type == '' ? null : _type == '0' ? 0 : 1,
 );
+const _type = String.fromEnvironment('ARS2FA_TYPE');
 
 void main() => runApp(const MaterialApp(home: Home()));
 

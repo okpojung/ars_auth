@@ -93,6 +93,21 @@ void main() {
       expect(body['integrity_token'], 't1');
     });
 
+    test('type 0/1 is sent only when set (config or call)', () async {
+      final bodies = <Map<String, dynamic>>[];
+      Ars2faClient mk(Ars2faConfig c) => Ars2faClient(c, httpClient: MockClient((req) async {
+            bodies.add(jsonDecode(req.body) as Map<String, dynamic>);
+            return j(sessionJson(), 201);
+          }));
+      await mk(cfg).createSession();
+      await mk(cfg).createSession(type: 0);
+      const cfg1 = Ars2faConfig(apiKey: 'k', mobileAppName: 'BS Point', packageName: 'p', platform: 'ANDROID', baseUrl: 'https://ars2fa.test', type: 1);
+      await mk(cfg1).createSession();
+      expect(bodies[0].containsKey('type'), isFalse);
+      expect(bodies[1]['type'], 0);
+      expect(bodies[2]['type'], 1);
+    });
+
     test('error bodies map to codes', () {
       expect(Ars2faClient.errorFrom(503, {'code': 'CARRIER_UNAVAILABLE', 'message': '...'}).code, 'CARRIER_UNAVAILABLE');
       expect(Ars2faClient.errorFrom(503, {'statusCode': 503, 'message': 'NO_NUMBER_AVAILABLE'}).code, 'NO_NUMBER_AVAILABLE');

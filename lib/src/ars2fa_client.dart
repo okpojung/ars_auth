@@ -96,13 +96,16 @@ class Ars2faClient {
     String? purpose,
     String? expectedPhone,
     String? appsid,
+    int? type,
     IntegrityProof? proof,
   }) async {
+    final t = type ?? config.type;
     final j = await _post('/v1/ars/sessions', {
       'mode': 'APP',
       'purpose': purpose ?? config.purpose,
       'expected_phone': expectedPhone ?? config.expectedPhone,
       'appsid': appsid ?? config.appsid,
+      if (t == 0 || t == 1) 'type': t,
       ...?proof?.toJson(),
     });
     return ArsSession.fromJson(j, receivedAt: _clock());

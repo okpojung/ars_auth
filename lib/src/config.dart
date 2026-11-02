@@ -32,6 +32,7 @@ class Ars2faConfig {
     this.purpose,
     this.expectedPhone,
     this.appsid,
+    this.type,
     this.integrityProvider,
     this.pollInterval = const Duration(milliseconds: 1500),
     this.requestTimeout = const Duration(seconds: 15),
@@ -61,6 +62,10 @@ class Ars2faConfig {
   /// 이미 아는 회원 번호를 확인할 때만. 다른 번호로 걸면 phone_mismatch.
   final String? expectedPhone;
   final String? appsid;
+
+  /// 통화 방식. 0 = 1번 누르기 없이 연결되면 바로 완료, 1 = 안내 후 1번 누르기.
+  /// null이면 ars2fa 콘솔의 앱 설정을 따릅니다.
+  final int? type;
   final IntegrityProvider? integrityProvider;
   final Duration pollInterval;
   final Duration requestTimeout;
