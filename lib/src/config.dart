@@ -65,7 +65,8 @@ class Ars2faConfig {
   final Duration pollInterval;
   final Duration requestTimeout;
 
-  /// Android에서 CALL_PHONE 권한이 있으면 다이얼러를 거치지 않고 바로 발신.
+  /// Android: 전화 권한(CALL_PHONE)을 요청해 허용되면 다이얼러를 거치지 않고 바로 발신합니다.
+  /// 거부되면 다이얼러가 열리고 사용자가 통화 버튼을 누릅니다. false면 항상 다이얼러.
   final bool useDirectCall;
 
   String get clientPlatform =>

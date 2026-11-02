@@ -1,6 +1,6 @@
 name: ars_login
 description: "ars2fa 발신 ARS 휴대폰 인증 Flutter SDK. 앱이 인증용 0507 번호로 바로 전화를 걸고(번호 비표시) 통신사 기록으로 확인된 휴대폰 번호를 돌려받습니다."
-version: 2.0.0
+version: 2.0.1
 homepage: https://ars2fa.baro.me
 repository: https://github.com/okpojung/ars_auth
 publish_to: 'none'

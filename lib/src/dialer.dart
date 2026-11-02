@@ -10,12 +10,11 @@ abstract class ArsDialer {
 }
 
 /// 기본 발신기.
-/// - Android: CALL_PHONE 권한이 이미 있으면 바로 발신(번호가 다이얼러에 머물지 않음),
-///   없으면 `tel:`로 다이얼러를 열어 사용자가 통화 버튼을 누르게 합니다.
+/// - Android: CALL_PHONE 권한이 없으면 먼저 권한을 요청하고(기본), 허용되면 바로 발신합니다
+///   (번호가 다이얼러에 머물지 않음). 거부되었거나 바로 발신이 실패하면 `tel:`로 다이얼러를 엽니다.
 /// - iOS: `tel:` (시스템이 발신 확인을 띄움).
-/// 권한을 새로 요청하지 않습니다. 필요하면 [requestPermission]을 true로.
 class DefaultArsDialer implements ArsDialer {
-  const DefaultArsDialer({this.directCall = true, this.requestPermission = false});
+  const DefaultArsDialer({this.directCall = true, this.requestPermission = true});
 
   final bool directCall;
   final bool requestPermission;
@@ -25,7 +24,9 @@ class DefaultArsDialer implements ArsDialer {
     final number = telUri.replaceFirst(RegExp(r'^tel:'), '');
     if (directCall && defaultTargetPlatform == TargetPlatform.android) {
       var granted = await Permission.phone.isGranted;
-      if (!granted && requestPermission) granted = await Permission.phone.request().isGranted;
+      if (!granted && requestPermission && !await Permission.phone.isPermanentlyDenied) {
+        granted = await Permission.phone.request().isGranted;
+      }
       if (granted) {
         final ok = await FlutterPhoneDirectCaller.callNumber(number);
         if (ok == true) return true;
