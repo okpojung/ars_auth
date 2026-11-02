@@ -38,7 +38,8 @@ dependencies:
 </queries>
 ```
 
-- 인증 버튼을 누르면 SDK가 **전화 권한을 요청**하고, 허용되면 **바로 발신**합니다(번호가 화면에 머물지 않음).
+- 인증 버튼을 누르면 **바로 발신**합니다(번호가 화면에 머물지 않음). 처음 한 번은 시스템이 **전화 권한 창**을 띄우고, 허용하면 그대로 발신합니다.
+- 필요한 권한은 `CALL_PHONE` 하나입니다(`READ_PHONE_STATE` 불필요).
 - 사용자가 권한을 거부하면 다이얼러가 열리고 사용자가 통화 버튼을 누릅니다.
 - 권한을 묻지 않게 하려면 `ArsAuthController(dialer: DefaultArsDialer(requestPermission: false))`, 항상 다이얼러를 쓰려면 `useDirectCall: false`.
 
